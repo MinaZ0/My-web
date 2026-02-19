@@ -1,7 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container">
-    <h1 class="mt-5">ยินดีต้อนรับสู่ร้านค้าของ Guy!</h1>
-    <p>กำลังเตรียมลงสินค้าเร็วๆ นี้...</p>
+<div class="container mt-4">
+    <h2 class="mb-4">สินค้าแนะนำ</h2>
+    <div class="row">
+        {% for p in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card product-card">
+                <img src="{{ p.img }}" class="card-img-top">
+                <div class="card-body">
+                    <h5 class="card-title">{{ p.name }}</h5>
+                    <p class="card-text text-primary">{{ p.price }} บาท</p>
+                    <button class="btn btn-outline-dark">หยิบลงตะกร้า</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}
