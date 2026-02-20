@@ -13,14 +13,16 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-class Product(db.Model):
+class Card(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    game = db.Column(db.String(50), nullable=False)  # Pokemon, Yu-Gi-Oh
+    rarity = db.Column(db.String(20))                # Secret Rare, Holo
     price = db.Column(db.Integer, nullable=False)
-    image_url = db.Column(db.String(200), default='https://via.placeholder.com/150')
+    image_url = db.Column(db.String(200))
 
     def __repr__(self):
-        return f'<Product {self.name}>'
+        return f'<Card {self.name}>'
 
 @app.route('/')
 def index():
