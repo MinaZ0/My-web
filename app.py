@@ -13,8 +13,15 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    price = db.Column(db.Integer, nullable=False)
+    image_url = db.Column(db.String(200), default='https://via.placeholder.com/150')
 
-# 4. Routes
+    def __repr__(self):
+        return f'<Product {self.name}>'
+
 @app.route('/')
 def index():
     # ดึงข้อมูลสินค้าทั้งหมดจาก Database
