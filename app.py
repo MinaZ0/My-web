@@ -38,11 +38,11 @@ def seed_data():
         if not Card.query.first():
             # Commit 16: Pokemon Cards
             c1 = Card(name='Pikachu VMAX', game='Pokemon', rarity='Secret Rare', 
-                      price=1200, image_url='https://images.pokemontcg.io/swsh4/44_hires.png')
+                    price=1200, image_url='https://images.pokemontcg.io/swsh4/44_hires.png')
             
             # Commit 17: Yu-Gi-Oh Cards
             c2 = Card(name='Dark Magician', game='Yu-Gi-Oh', rarity='Ultra Rare', 
-                      price=800, image_url='https://images.ygoprodeck.com/images/cards/46986414.jpg')
+                    price=800, image_url='https://images.ygoprodeck.com/images/cards/46986414.jpg')
             
             db.session.add_all([c1, c2])
             db.session.commit()
