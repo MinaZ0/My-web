@@ -1,16 +1,33 @@
 {% extends "base.html" %}
+
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">สินค้าแนะนำ</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Card Showcase</h2>
+        <span class="badge bg-dark">{{ cards|length }} items available</span>
+    </div>
+
     <div class="row">
-        {% for p in products %}
-        <div class="col-md-4 mb-4">
-            <div class="card product-card">
-                <img src="{{ p.img }}" class="card-img-top">
+        {% for card in cards %}
+        <div class="col-md-4 col-lg-3 mb-4">
+            <div class="card h-100 shadow-sm border-0 product-card">
+                <div class="text-center p-3">
+                    <img src="{{ card.image_url }}" class="card-img-top img-fluid shadow-sm" style="border-radius: 10px; max-height: 250px; object-fit: contain;" alt="{{ card.name }}">
+                </div>
+                
                 <div class="card-body">
-                    <h5 class="card-title">{{ p.name }}</h5>
-                    <p class="card-text text-primary">{{ p.price }} บาท</p>
-                    <button class="btn btn-outline-dark">หยิบลงตะกร้า</button>
+                    <p class="text-uppercase text-muted small mb-1">{{ card.game }}</p>
+                    <h5 class="card-title fw-bold mb-2">{{ card.name }}</h5>
+                    
+                    <p class="mb-2">
+                        <span class="badge bg-warning text-dark">{{ card.rarity }}</span>
+                    </p>
+                    
+                    <h5 class="text-primary fw-bold mb-3">{{ "{:,}".format(card.price) }} THB</h5>
+                    
+                    <div class="d-grid">
+                        <button class="btn btn-outline-dark btn-sm">Add to Cart</button>
+                    </div>
                 </div>
             </div>
         </div>
