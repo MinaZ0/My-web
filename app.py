@@ -1,18 +1,17 @@
 import os
-from flask import Flask, render_template, request # เพิ่มการ import request
+from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 
-# ตั้งค่า Path สำหรับ Database
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'guy-tcg-secret-key' #
+app.config['SECRET_KEY'] = 'guy-tcg-secret-key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# --- Card Model ---
+# Model การ์ด TCG
 class Card(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -21,25 +20,24 @@ class Card(db.Model):
     price = db.Column(db.Integer, nullable=False)
     image_url = db.Column(db.String(255))
 
-    def __repr__(self):
-        return f'<Card {self.name}>'
-
-# --- Commit 22: Index Route with Search Logic ---
+# Route หลัก รองรับ Search และ Filter
 @app.route('/')
 def index():
-    # รับค่า 'search' จาก URL (เช่น /?search=pikachu)
     search_query = request.args.get('search')
+    game_filter = request.args.get('game')
+    
+    query = Card.query
     
     if search_query:
-        # ค้นหาการ์ดที่ชื่อมีคำที่ระบุ (Case-insensitive ใน SQLite)
-        all_cards = Card.query.filter(Card.name.contains(search_query)).all()
-    else:
-        # ถ้าไม่มีการค้นหา ให้ดึงข้อมูลทั้งหมดตามปกติ
-        all_cards = Card.query.all()
+        query = query.filter(Card.name.contains(search_query))
+    
+    if game_filter:
+        query = query.filter(Card.game == game_filter)
         
+    all_cards = query.all()
     return render_template('index.html', cards=all_cards)
 
-# --- Seed Data Function ---
+# ฟังก์ชัน Seed ข้อมูลเบื้องต้น
 def seed_data():
     with app.app_context():
         db.create_all()
@@ -50,7 +48,6 @@ def seed_data():
                       price=800, image_url='https://images.ygoprodeck.com/images/cards/46986414.jpg')
             db.session.add_all([c1, c2])
             db.session.commit()
-            print("Successfully Seeded TCG Data!")
 
 if __name__ == '__main__':
     seed_data()
