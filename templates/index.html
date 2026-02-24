@@ -1,37 +1,34 @@
-{% extends "base.html" %}
-
-{% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Card Showcase</h2>
-        <span class="badge bg-dark">{{ cards|length }} items available</span>
-    </div>
-
-    <div class="row">
-        {% for card in cards %}
-        <div class="col-md-4 col-lg-3 mb-4">
-            <div class="card h-100 shadow-sm border-0 product-card">
-                <div class="text-center p-3">
-                    <img src="{{ card.image_url }}" class="card-img-top img-fluid shadow-sm" style="border-radius: 10px; max-height: 250px; object-fit: contain;" alt="{{ card.name }}">
-                </div>
-                
-                <div class="card-body">
-                    <p class="text-uppercase text-muted small mb-1">{{ card.game }}</p>
-                    <h5 class="card-title fw-bold mb-2">{{ card.name }}</h5>
-                    
-                    <p class="mb-2">
-                        <span class="badge bg-warning text-dark">{{ card.rarity }}</span>
-                    </p>
-                    
-                    <h5 class="text-primary fw-bold mb-3">{{ "{:,}".format(card.price) }} THB</h5>
-                    
-                    <div class="d-grid">
-                        <button class="btn btn-outline-dark btn-sm">Add to Cart</button>
-                    </div>
-                </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guy TCG Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">GUY TCG SHOP</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link active" href="/">Store</a></li>
+                </ul>
+                <form class="d-flex" action="/" method="GET">
+                    <input class="form-control me-2" type="search" name="search" placeholder="Search cards..." aria-label="Search">
+                    <button class="btn btn-outline-warning" type="submit">Search</button>
+                </form>
             </div>
         </div>
-        {% endfor %}
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
     </div>
-</div>
-{% endblock %}
+
+    <footer class="text-center mt-5 py-4 border-top">
+        <p class="text-muted">&copy; 2026 Guy TCG Project - PSU AI Engineering Student</p>
+    </footer>
+</body>
+</html>
