@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow p-4">
+            <h3 class="fw-bold mb-4">เพิ่มการ์ดใหม่เข้าสต็อก</h3>
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">ชื่อการ์ด</label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">ชื่อเกม (เช่น Pokemon, Yu-Gi-Oh)</label>
+                    <input type="text" name="game" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">ระดับความหายาก (Rarity)</label>
+                    <input type="text" name="rarity" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">ราคา (THB)</label>
+                    <input type="number" name="price" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">URL รูปภาพ</label>
+                    <input type="text" name="image_url" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-success w-100">บันทึกข้อมูล</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
