@@ -14,6 +14,8 @@
                     <p class="fs-5 text-primary fw-bold">{{ "{:,}".format(card.price) }} THB</p>
                     <div class="d-grid gap-2">
                         <button class="btn btn-dark btn-sm">Add to Cart</button>
+                    <a href="/delete/{{ card.id }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('ลบการ์ดใบนี้?')">Delete</a>
+                </div>
                     </div>
                 </div>
             </div>
