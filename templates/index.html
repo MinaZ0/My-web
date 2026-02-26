@@ -12,6 +12,17 @@
                     <h5 class="card-title fw-bold">{{ card.name }}</h5>
                     <p class="text-danger small mb-2">{{ card.rarity }}</p>
                     <p class="fs-5 text-primary fw-bold">{{ "{:,}".format(card.price) }} THB</p>
+                    {% if card.image_url %}
+                        <img src="{{ card.image_url }}" class="card-img-top p-3" style="max-height: 250px; object-fit: contain;">
+                    {% else %}
+                        <div class="bg-secondary-subtle d-flex align-items-center justify-content-center" style="height: 250px; border-radius: 8px 8px 0 0;">
+                            <span class="text-muted">No Image</span>
+                        </div>
+                    {% endif %}
+                    <span class="badge bg-secondary mb-2">{{ card.game }}</span>
+                    <h5 class="card-title fw-bold">{{ card.name }}</h5>
+                    <p class="text-danger small mb-2">{{ card.rarity }}</p>
+                    <p class="fs-5 text-primary fw-bold">{{ "{:,}".format(card.price) }} THB</p>
                     <div class="d-grid gap-2">
                         <button class="btn btn-success btn-sm fw-bold">Buy Now</button>
                         <a href="/delete/{{ card.id }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('ลบการ์ดใบนี้?')">Delete</a>
