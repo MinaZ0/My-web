@@ -1,35 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Trading Cards</h2>
+    <h2 class="mb-4 fw-bold">Trading Cards Stock</h2>
+    
     <div class="row">
         {% for card in cards %}
         <div class="col-md-4 col-lg-3 mb-4">
-            <div class="card h-100 shadow-sm border-0">
-                <img src="{{ card.image_url }}" class="card-img-top p-3" style="max-height: 250px; object-fit: contain;">
-                <div class="card-body text-center">
-                    <span class="badge bg-secondary mb-2">{{ card.game }}</span>
-                    <h5 class="card-title fw-bold">{{ card.name }}</h5>
-                    <p class="text-danger small mb-2">{{ card.rarity }}</p>
-                    <p class="fs-5 text-primary fw-bold">{{ "{:,}".format(card.price) }} THB</p>
+            <div class="card h-100 shadow-sm border-0 product-card">
+                
+                <div class="text-center p-3">
                     {% if card.image_url %}
-                        <img src="{{ card.image_url }}" class="card-img-top p-3" style="max-height: 250px; object-fit: contain;">
+                        <img src="{{ card.image_url }}" class="card-img-top img-fluid shadow-sm" 
+                             style="border-radius: 10px; max-height: 200px; object-fit: contain;">
                     {% else %}
-                        <div class="bg-secondary-subtle d-flex align-items-center justify-content-center" style="height: 250px; border-radius: 8px 8px 0 0;">
+                        <div class="bg-secondary-subtle d-flex align-items-center justify-content-center" 
+                             style="height: 200px; border-radius: 10px; border: 2px dashed #ccc;">
                             <span class="text-muted">No Image</span>
                         </div>
                     {% endif %}
+                </div>
+
+                <div class="card-body text-center pt-0">
                     <span class="badge bg-secondary mb-2">{{ card.game }}</span>
-                    <h5 class="card-title fw-bold">{{ card.name }}</h5>
+                    <h5 class="card-title fw-bold mb-1">{{ card.name }}</h5>
                     <p class="text-danger small mb-2">{{ card.rarity }}</p>
-                    <p class="fs-5 text-primary fw-bold">{{ "{:,}".format(card.price) }} THB</p>
+                    <h5 class="text-primary fw-bold mb-3">{{ "{:,}".format(card.price) }} THB</h5>
+                    
                     <div class="d-grid gap-2">
-                        <button class="btn btn-success btn-sm fw-bold">Buy Now</button>
-                        <a href="/delete/{{ card.id }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('ลบการ์ดใบนี้?')">Delete</a>
+                        <button class="btn btn-success fw-bold">Buy Now</button>
+                        <a href="/delete/{{ card.id }}" class="btn btn-outline-danger btn-sm" 
+                           onclick="return confirm('ลบการ์ดใบนี้?')">Delete</a>
                     </div>
                 </div>
-            </div>
-        </div>
             </div>
         </div>
         {% endfor %}
