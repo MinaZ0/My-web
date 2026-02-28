@@ -27,8 +27,15 @@ class Card(db.Model):
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(50), nullable=False) # ในงานจริงควรแฮชรหัสผ่าน
+    password = db.Column(db.String(50), nullable=False)
     balance = db.Column(db.Integer, default=0)
+
+class Transaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    amount = db.Column(db.Integer)
+    type = db.Column(db.String(20)) # 'topup' หรือ 'buy'
+    date = db.Column(db.DateTime, default=db.func.now())
 
 @app.route('/')
 def index():
