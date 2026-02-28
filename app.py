@@ -119,6 +119,20 @@ def seed_data():
             db.session.add_all([c1, c2])
             db.session.commit()
 
+def seed_data():
+    with app.app_context():
+        db.create_all() # สร้างตารางทั้งหมด (ถ้ายังไม่มี)
+        
+        if not User.query.filter_by(username='guy').first():
+            test_user = User(
+                username='guy', 
+                password='123', # รหัสผ่านตัวอย่าง
+                balance=5000     # เติมเงินให้ฟรีๆ ไว้ทดสอบระบบ
+            )
+            db.session.add(test_user)
+            db.session.commit()
+            print("Seed data: User 'guy' created!")
+
 if __name__ == '__main__':
     seed_data()
     app.run(debug=True)  
