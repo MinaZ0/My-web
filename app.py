@@ -63,6 +63,21 @@ def delete_card(id):
     db.session.commit()                         # ยืนยันการลบ
     return redirect(url_for('index'))
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        user = User.query.filter_by(username=username).first()
+        if user: 
+            login_user(user)
+            return redirect(url_for('index'))
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
