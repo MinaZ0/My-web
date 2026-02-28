@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -8,6 +9,10 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'guy-tcg-secret-key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 db = SQLAlchemy(app)
 
@@ -18,6 +23,12 @@ class Card(db.Model):
     rarity = db.Column(db.String(50))
     price = db.Column(db.Integer, nullable=False)
     image_url = db.Column(db.String(255))
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(50), nullable=False) # ในงานจริงควรแฮชรหัสผ่าน
+    balance = db.Column(db.Integer, default=0)
 
 @app.route('/')
 def index():
@@ -51,6 +62,10 @@ def delete_card(id):
     db.session.delete(card_to_delete)           # สั่งลบ
     db.session.commit()                         # ยืนยันการลบ
     return redirect(url_for('index'))
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 def seed_data():
     with app.app_context():
