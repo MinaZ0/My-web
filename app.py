@@ -89,6 +89,25 @@ def logout():
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+@app.route('/topup', methods=['GET', 'POST'])
+@login_required
+def topup():
+    if request.method == 'POST':
+        amount = int(request.form.get('amount'))
+        current_user.balance += amount
+        new_tx = Transaction(user_id=current_user.id, amount=amount, type='topup')
+        db.session.add(new_tx)
+        db.session.commit()
+        flash(f'เติมเงินสำเร็จ! ยอดคงเหลือ {current_user.balance} THB', 'success')
+        return redirect(url_for('history'))
+    return render_template('topup.html')
+
+@app.route('/history')
+@login_required
+def history():
+    txs = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.date.desc()).all()
+    return render_template('history.html', transactions=txs)
+
 def seed_data():
     with app.app_context():
         db.create_all()
