@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3 class="fw-bold mb-4">ประวัติการทำรายการ</h3>
+    <table class="table table-hover shadow-sm bg-white rounded">
+        <thead class="table-dark">
+            <tr>
+                <th>วันที่/เวลา</th>
+                <th>ประเภท</th>
+                <th>จำนวนเงิน</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tx in transactions %}
+            <tr>
+                <td>{{ tx.date.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td><span class="badge {{ 'bg-success' if tx.type == 'topup' else 'bg-danger' }}">{{ tx.type }}</span></td>
+                <td class="fw-bold text-{{ 'success' if tx.type == 'topup' else 'danger' }}">{{ tx.amount }} THB</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
