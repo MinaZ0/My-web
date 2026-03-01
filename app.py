@@ -104,14 +104,6 @@ def buy_card(id):
     flash(f'ซื้อ {card.name} สำเร็จ!', 'success')
     return redirect(url_for('history'))
 
-@app.route('/delete/<int:id>')
-@login_required
-def delete_card(id):
-    card = Card.query.get_or_404(id)
-    if card.user_id != current_user.id:
-        flash('คุณไม่มีสิทธิ์ลบการ์ดของคนอื่น!', 'danger')
-        return
-
 @app.route('/profile')
 @login_required
 def profile():

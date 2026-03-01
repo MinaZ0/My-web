@@ -4,9 +4,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold m-0">🔥 Trading Cards Market</h2>
         <div>
-            <a href="/" class="btn btn-outline-dark btn-sm">All</a>
-            <a href="/?game=Pokemon" class="btn btn-outline-primary btn-sm">Pokemon</a>
-            <a href="/?game=Yu-Gi-Oh" class="btn btn-outline-danger btn-sm">Yu-Gi-Oh</a>
+            <a href="/" class="btn btn-outline-dark btn-sm shadow-sm">All</a>
+            <a href="/?game=Pokemon" class="btn btn-outline-primary btn-sm shadow-sm">Pokemon</a>
+            <a href="/?game=Yu-Gi-Oh" class="btn btn-outline-danger btn-sm shadow-sm">Yu-Gi-Oh</a>
         </div>
     </div>
     
@@ -34,3 +34,24 @@
                     <h5 class="text-primary fw-bold mb-3">{{ "{:,}".format(card.price) }} THB</h5>
                     
                     <div class="d-grid gap-2">
+                        <a href="/buy/{{ card.id }}" class="btn btn-success fw-bold" 
+                           onclick="return confirm('ยืนยันการซื้อ {{ card.name }} ราคา {{ card.price }} THB?')">
+                           Buy Now
+                        </a>
+                        
+                        <a href="/wishlist/add/{{ card.id }}" class="btn btn-outline-danger btn-sm fw-bold">
+                           ❤️ Add to Wishlist
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <h4 class="text-muted">ไม่พบการ์ดที่ค้นหา...</h4>
+            <a href="/" class="btn btn-link">ล้างการค้นหา</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
