@@ -1,22 +1,102 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Guy TCG Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUY TCG SHOP | ตลาดการ์ดออนไลน์</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background: linear-gradient(90deg, #1a1a1a 0%, #333333 100%);
+            border-bottom: 3px solid #ffc107;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: #ffc107 !important;
+            letter-spacing: 1px;
+        }
+        .nav-link {
+            font-weight: 400;
+            transition: 0.3s;
+        }
+        .nav-link:hover {
+            color: #ffc107 !important;
+        }
+        .balance-badge {
+            background-color: rgba(255, 193, 7, 0.2);
+            border: 1px solid #ffc107;
+            color: #ffc107;
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-weight: 600;
+        }
+        .footer {
+            margin-top: 50px;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">GUY TCG SHOP</a>
-            <div class="navbar-nav ms-auto">
-                {% if current_user.is_authenticated %}
-                    <span class="nav-link text-warning">💰 {{ current_user.balance }} THB</span>
-                    <a class="nav-link" href="/wishlist">❤️ Wishlist</a>
-                    <a class="nav-link" href="/logout">Logout ({{ current_user.username }})</a>
-                {% else %}
-                    <a class="nav-link" href="/login">Login</a>
-                {% endif %}
+            <a class="navbar-brand" href="/">
+                <i class="fa-solid fa-bolt-lightning me-2"></i>GUY TCG SHOP
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-collapse="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fa-solid fa-shop me-1"></i> ตลาดการ์ด</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/inventory"><i class="fa-solid fa-box-archive me-1"></i> คลังของฉัน</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/history"><i class="fa-solid fa-clock-rotate-left me-1"></i> ประวัติการซื้อ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/wishlist"><i class="fa-solid fa-heart me-1"></i> รายการโปรด</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <div class="navbar-nav align-items-center">
+                    {% if current_user.is_authenticated %}
+                        <div class="nav-item me-3">
+                            <span class="balance-badge">
+                                <i class="fa-solid fa-wallet me-1"></i> {{ "{:,}".format(current_user.balance) }} THB
+                            </span>
+                        </div>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-user-circle me-1"></i> {{ current_user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li><a class="dropdown-item" href="/profile"><i class="fa-solid fa-id-card me-2"></i>โปรไฟล์</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="/logout"><i class="fa-solid fa-right-from-bracket me-2"></i>ออกจากระบบ</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="btn btn-outline-warning btn-sm px-4 rounded-pill" href="/login">เข้าสู่ระบบ</a>
+                        </li>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </nav>
@@ -25,11 +105,29 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                        {% if category == 'success' %} <i class="fa-solid fa-circle-check me-2"></i>
+                        {% elif category == 'danger' %} <i class="fa-solid fa-circle-exclamation me-2"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        {% block content %}{% endblock %}
     </div>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <hr>
+            <p>&copy; 2024 GUY TCG Marketplace Project - Commit 60 Edition</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
