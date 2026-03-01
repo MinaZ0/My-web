@@ -109,3 +109,9 @@ def delete_card(id):
     if card.user_id != current_user.id:
         flash('คุณไม่มีสิทธิ์ลบการ์ดของคนอื่น!', 'danger')
         return
+
+@app.route('/profile')
+@login_required
+def profile():
+    my_cards_count = Card.query.filter_by(user_id=current_user.id).count()
+    return render_template('profile.html', cards_count=my_cards_count)
