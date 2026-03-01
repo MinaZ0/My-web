@@ -44,7 +44,9 @@ class Favorite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     card_id = db.Column(db.Integer, db.ForeignKey('card.id'))
-    card = db.relationship('Card', backref='faved_by')
+    
+    # เชื่อมความสัมพันธ์เพื่อให้ดึงข้อมูลการ์ดมาโชว์ในหน้า Wishlist ได้ง่ายๆ
+    card = db.relationship('Card', backref='favorited_by')
 
 @login_manager.user_loader
 def load_user(user_id):
