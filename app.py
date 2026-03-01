@@ -123,3 +123,51 @@ def profile():
 def my_cards():
     cards = Card.query.filter_by(user_id=current_user.id).all()
     return render_template('my_cards.html', cards=cards)
+
+@app.route('/delete/<int:id>')
+@login_required
+def delete_card(id):
+    card = Card.query.get_or_404(id)
+    if card.user_id != current_user.id:
+        flash('คุณไม่มีสิทธิ์ลบการ์ดของคนอื่น!', 'danger')
+        return redirect(url_for('index'))
+    db.session.delete(card)
+    db.session.commit()
+    flash('ลบรายการการ์ดสำเร็จ', 'info')
+    return redirect(url_for('my_cards'))
+
+# --- Commit 58: Wishlist Logic ---
+@app.route('/wishlist/add/<int:card_id>')
+@login_required
+def add_wishlist(card_id):
+    # เช็คว่าเคยถูกใจการ์ดใบนี้ไปหรือยัง
+    exists = Favorite.query.filter_by(user_id=current_user.id, card_id=card_id).first()
+    if not exists:
+        new_fav = Favorite(user_id=current_user.id, card_id=card_id)
+        db.session.add(new_fav)
+        db.session.commit()
+        flash('เพิ่มลงในรายการที่ชอบแล้ว! ❤️', 'success')
+    else:
+        flash('การ์ดใบนี้อยู่ในรายการที่ชอบอยู่แล้ว', 'info')
+    return redirect(url_for('index'))
+
+@app.route('/wishlist')
+@login_required
+def wishlist():
+    # ดึงรายการทั้งหมดที่เรากดหัวใจไว้มาโชว์
+    my_favs = Favorite.query.filter_by(user_id=current_user.id).all()
+    return render_template('wishlist.html', favorites=my_favs)
+
+# --- ส่วนปิดท้าย (เดิมของคุณ) ---
+def seed_data():
+    with app.app_context():
+        db.create_all()
+        if not User.query.filter_by(username='guy').first():
+            test_user = User(username='guy', password='123', balance=5000)
+            db.session.add(test_user)
+            db.session.commit()
+            print("Seed data: User 'guy' created!")
+
+if __name__ == '__main__':
+    seed_data()
+    app.run(debug=True)
