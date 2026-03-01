@@ -1,23 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
-<h2 class="mb-4 fw-bold">🛒 Card Market</h2>
-<div class="row">
-    {% for card in cards %}
-    <div class="col-md-3 mb-4">
-        <div class="card h-100 shadow-sm border-0">
-            <div class="text-center p-3">
-                <img src="{{ card.image_url }}" class="img-fluid" style="height: 200px; object-fit: contain;">
-            </div>
-            <div class="card-body text-center">
-                <h5 class="fw-bold">{{ card.name }}</h5>
-                <p class="text-primary fw-bold">{{ "{:,}".format(card.price) }} THB</p>
-                <div class="d-grid gap-2">
-                    <a href="/buy/{{ card.id }}" class="btn btn-success btn-sm">Buy Now</a>
-                    <a href="/wishlist/add/{{ card.id }}" class="btn btn-outline-danger btn-sm">❤️ Add to Wishlist</a>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark"><i class="fa-solid fa-store text-warning me-2"></i>ตลาดการ์ดมือสอง</h2>
+        <div class="text-muted small">มีการ์ดทั้งหมด {{ cards|length }} ใบในขณะนี้</div>
+    </div>
+
+    <div class="row">
+        {% for card in cards %}
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 shadow-sm border-0 product-card" style="border-radius: 15px; overflow: hidden;">
+                <div class="text-center p-3" style="background-color: #fcfcfc;">
+                    <img src="{{ card.image_url }}" class="img-fluid" style="height: 220px; object-fit: contain; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));">
+                </div>
+                
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-light text-dark border">{{ card.game }}</span>
+                        <span class="text-muted small">{{ card.rarity }}</span>
+                    </div>
+                    <h5 class="fw-bold mb-3 text-truncate">{{ card.name }}</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="h5 fw-bold text-primary mb-0">{{ "{:,}".format(card.price) }} <small>฿</small></span>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white border-0 pb-3">
+                    <div class="d-grid gap-2">
+                        <a href="/buy/confirm/{{ card.id }}" class="btn btn-success fw-bold rounded-pill shadow-sm">
+                            <i class="fa-solid fa-cart-plus me-1"></i> Buy Now
+                        </a>
+                        <a href="/wishlist/add/{{ card.id }}" class="btn btn-outline-danger btn-sm border-0">
+                            <i class="fa-solid fa-heart me-1"></i> เก็บไว้ในรายการโปรด
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <i class="fa-solid fa-box-open fa-4x text-muted mb-3 opacity-25"></i>
+            <h4 class="text-muted">ตลาดว่างเปล่า...</h4>
+            <p>ขณะนี้ยังไม่มีใครนำการ์ดมาวางขาย</p>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 {% endblock %}
