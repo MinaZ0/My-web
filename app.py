@@ -95,21 +95,42 @@ def wishlist():
     favs = Favorite.query.filter_by(user_id=current_user.id).all()
     return render_template('wishlist.html', favorites=favs)
 
+@app.route('/inventory')
+@login_required
+def inventory():
+    # ดึงการ์ดที่เป็นของ current_user (ที่เราซื้อมาแล้ว)
+    my_cards = Card.query.filter_by(user_id=current_user.id).all()
+    return render_template('inventory.html', cards=my_cards)
+
+@app.route('/history')
+@login_required
+def history():
+    # ดึงประวัติการทำรายการ (ซื้อ/เติมเงิน) ของ user นี้
+    transactions = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.date.desc()).all()
+    return render_template('history.html', transactions=transactions)
+
 # --- Database Setup ---
 def seed_data():
     with app.app_context():
+        db.drop_all() # เพิ่มบรรทัดนี้ชั่วคราวเพื่อล้างตารางเก่า
         db.create_all()
-        if not User.query.filter_by(username='guy').first():
-            admin = User(username='guy', password='123', balance=10000)
-            db.session.add(admin)
-            cards = [
-                Card(name='Charizard G', game='Pokemon', rarity='Ultra Rare', price=2500, 
-                     image_url='https://images.pokemontcg.io/pl3/1_hires.png', user_id=admin.id),
-                Card(name='Blue-Eyes White Dragon', game='Yu-Gi-Oh', rarity='Ultra Rare', price=3500, 
-                     image_url='https://images.ygoprodeck.com/images/cards/89631139.jpg', user_id=admin.id)
-            ]
-            db.session.bulk_save_objects(cards)
-            db.session.commit()
+        
+        # สร้าง User 'guy'
+        user = User(username='guy', password='123', balance=10000)
+        db.session.add(user)
+        
+        # เพิ่มการ์ดตัวอย่าง 3 ใบ
+        cards = [
+            Card(name='Charizard G', game='Pokemon', rarity='Ultra Rare', price=2500, 
+                 image_url='https://images.pokemontcg.io/pl3/1_hires.png'),
+            Card(name='Blue-Eyes White Dragon', game='Yu-Gi-Oh', rarity='Ultra Rare', price=3500, 
+                 image_url='https://images.ygoprodeck.com/images/cards/89631139.jpg'),
+            Card(name='Dark Magician', game='Yu-Gi-Oh', rarity='Super Rare', price=1800, 
+                 image_url='https://images.ygoprodeck.com/images/cards/46986414.jpg')
+        ]
+        db.session.bulk_save_objects(cards)
+        db.session.commit()
+        print("✅ สร้างข้อมูลการ์ดตัวอย่างเรียบร้อยแล้ว!")
 
 if __name__ == '__main__':
     seed_data()
