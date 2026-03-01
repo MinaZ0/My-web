@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4 fw-bold">Trading Cards Stock</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold m-0">🔥 Trading Cards Market</h2>
+        <div>
+            <a href="/" class="btn btn-outline-dark btn-sm">All</a>
+            <a href="/?game=Pokemon" class="btn btn-outline-primary btn-sm">Pokemon</a>
+            <a href="/?game=Yu-Gi-Oh" class="btn btn-outline-danger btn-sm">Yu-Gi-Oh</a>
+        </div>
+    </div>
     
     <div class="row">
         {% for card in cards %}
@@ -27,14 +34,3 @@
                     <h5 class="text-primary fw-bold mb-3">{{ "{:,}".format(card.price) }} THB</h5>
                     
                     <div class="d-grid gap-2">
-                        <button class="btn btn-success fw-bold">Buy Now</button>
-                        <a href="/delete/{{ card.id }}" class="btn btn-outline-danger btn-sm" 
-                           onclick="return confirm('ลบการ์ดใบนี้?')">Delete</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
-{% endblock %}
