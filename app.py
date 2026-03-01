@@ -16,12 +16,11 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # --- Models ---
-
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(50), nullable=False)
-    balance = db.Column(db.Integer, default=0)
+    balance = db.Column(db.Integer, default=10000) # เริ่มต้นหมื่นนึง
     cards = db.relationship('Card', backref='owner', lazy=True)
 
 class Card(db.Model):
@@ -31,21 +30,12 @@ class Card(db.Model):
     rarity = db.Column(db.String(50))
     price = db.Column(db.Integer, nullable=False)
     image_url = db.Column(db.String(255))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # เก็บว่าใครเป็นเจ้าของ
-
-class Transaction(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    amount = db.Column(db.Integer)
-    type = db.Column(db.String(20)) # 'topup' หรือ 'buy'
-    date = db.Column(db.DateTime, default=db.func.now())
 
 class Favorite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     card_id = db.Column(db.Integer, db.ForeignKey('card.id'))
-    
-    # เชื่อมความสัมพันธ์เพื่อให้ดึงข้อมูลการ์ดมาโชว์ในหน้า Wishlist ได้ง่ายๆ
     card = db.relationship('Card', backref='favorited_by')
 
 @login_manager.user_loader
@@ -53,113 +43,74 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # --- Routes ---
-
 @app.route('/')
 def index():
-    game_filter = request.args.get('game')
-    search_query = request.args.get('search')
-    
-    query = Card.query
-    if game_filter:
-        query = query.filter_by(game=game_filter)
-    if search_query:
-        query = query.filter(Card.name.contains(search_query))
-        
-    all_cards = query.all()
+    all_cards = Card.query.all()
     return render_template('index.html', cards=all_cards)
 
-@app.route('/add', methods=['GET', 'POST'])
-@login_required
-def add_card():
+@app.route('/login', methods=['GET', 'POST'])
+def login():
     if request.method == 'POST':
-        new_card = Card(
-            name=request.form.get('name'),
-            game=request.form.get('game'),
-            rarity=request.form.get('rarity'),
-            price=int(request.form.get('price') or 0),
-            image_url=request.form.get('image_url'),
-            user_id=current_user.id # บันทึกเจ้าของ
-        )
-        db.session.add(new_card)
-        db.session.commit()
-        flash('ลงขายการ์ดสำเร็จ!', 'success')
-        return redirect(url_for('index'))
-    return render_template('add_card.html')
+        user = User.query.filter_by(username=request.form.get('username')).first()
+        if user and user.password == request.form.get('password'):
+            login_user(user)
+            flash('ยินดีต้อนรับกลับมา!', 'success')
+            return redirect(url_for('index'))
+        flash('ชื่อผู้ใช้หรือรหัสผ่านผิด', 'danger')
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 @app.route('/buy/<int:id>')
 @login_required
 def buy_card(id):
     card = Card.query.get_or_404(id)
-    if current_user.balance < card.price:
+    if current_user.balance >= card.price:
+        current_user.balance -= card.price
+        card.user_id = current_user.id # เปลี่ยนเจ้าของ
+        db.session.commit()
+        flash(f'ซื้อ {card.name} สำเร็จ!', 'success')
+    else:
         flash('เงินไม่พอ กรุณาเติมเงิน!', 'danger')
-        return redirect(url_for('topup'))
-    
-    # หักเงิน บันทึกประวัติ และลบการ์ด (เพราะถูกซื้อไปแล้ว)
-    current_user.balance -= card.price
-    new_tx = Transaction(user_id=current_user.id, amount=card.price, type='buy')
-    db.session.add(new_tx)
-    db.session.delete(card) 
-    db.session.commit()
-    
-    flash(f'ซื้อ {card.name} สำเร็จ!', 'success')
-    return redirect(url_for('history'))
+    return redirect(url_for('index'))
 
-@app.route('/profile')
-@login_required
-def profile():
-    my_cards_count = Card.query.filter_by(user_id=current_user.id).count()
-    return render_template('profile.html', cards_count=my_cards_count)
-
-@app.route('/my-cards')
-@login_required
-def my_cards():
-    cards = Card.query.filter_by(user_id=current_user.id).all()
-    return render_template('my_cards.html', cards=cards)
-
-@app.route('/delete/<int:id>')
-@login_required
-def delete_card(id):
-    card = Card.query.get_or_404(id)
-    if card.user_id != current_user.id:
-        flash('คุณไม่มีสิทธิ์ลบการ์ดของคนอื่น!', 'danger')
-        return redirect(url_for('index'))
-    db.session.delete(card)
-    db.session.commit()
-    flash('ลบรายการการ์ดสำเร็จ', 'info')
-    return redirect(url_for('my_cards'))
-
-# --- Commit 58: Wishlist Logic ---
 @app.route('/wishlist/add/<int:card_id>')
 @login_required
 def add_wishlist(card_id):
-    # เช็คว่าเคยถูกใจการ์ดใบนี้ไปหรือยัง
     exists = Favorite.query.filter_by(user_id=current_user.id, card_id=card_id).first()
     if not exists:
         new_fav = Favorite(user_id=current_user.id, card_id=card_id)
         db.session.add(new_fav)
         db.session.commit()
-        flash('เพิ่มลงในรายการที่ชอบแล้ว! ❤️', 'success')
-    else:
-        flash('การ์ดใบนี้อยู่ในรายการที่ชอบอยู่แล้ว', 'info')
+        flash('เพิ่มในรายการที่ชอบแล้ว ❤️', 'success')
     return redirect(url_for('index'))
 
 @app.route('/wishlist')
 @login_required
 def wishlist():
-    # ดึงรายการทั้งหมดที่เรากดหัวใจไว้มาโชว์
-    my_favs = Favorite.query.filter_by(user_id=current_user.id).all()
-    return render_template('wishlist.html', favorites=my_favs)
+    favs = Favorite.query.filter_by(user_id=current_user.id).all()
+    return render_template('wishlist.html', favorites=favs)
 
-# --- ส่วนปิดท้าย (เดิมของคุณ) ---
+# --- Database Setup ---
 def seed_data():
     with app.app_context():
         db.create_all()
         if not User.query.filter_by(username='guy').first():
-            test_user = User(username='guy', password='123', balance=5000)
-            db.session.add(test_user)
+            admin = User(username='guy', password='123', balance=10000)
+            db.session.add(admin)
+            cards = [
+                Card(name='Charizard G', game='Pokemon', rarity='Ultra Rare', price=2500, 
+                     image_url='https://images.pokemontcg.io/pl3/1_hires.png', user_id=admin.id),
+                Card(name='Blue-Eyes White Dragon', game='Yu-Gi-Oh', rarity='Ultra Rare', price=3500, 
+                     image_url='https://images.ygoprodeck.com/images/cards/89631139.jpg', user_id=admin.id)
+            ]
+            db.session.bulk_save_objects(cards)
             db.session.commit()
-            print("Seed data: User 'guy' created!")
 
 if __name__ == '__main__':
     seed_data()
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

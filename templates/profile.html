@@ -1,28 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow-lg border-0 text-center p-5" style="border-radius: 20px;">
-                <img src="https://ui-avatars.com/api/?name={{ current_user.username }}&size=128&background=random" class="rounded-circle mx-auto mb-3 shadow border border-4 border-white">
-                <h2 class="fw-bold mb-0">{{ current_user.username }}</h2>
-                <p class="text-muted mb-4">TCG Enthusiast</p>
-                
-                <div class="row bg-light rounded-4 p-3 mb-4 shadow-sm">
-                    <div class="col-6 border-end">
-                        <h4 class="text-success fw-bold mb-0">{{ "{:,}".format(current_user.balance) }}</h4>
-                        <small class="text-muted">ยอดเงิน (บาท)</small>
-                    </div>
-                    <div class="col-6">
-                        <h4 class="text-primary fw-bold mb-0">{{ cards_count }}</h4>
-                        <small class="text-muted">การ์ดที่ลงขาย</small>
-                    </div>
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center mt-5">
+        <div class="card shadow-lg p-5 border-0" style="border-radius: 20px;">
+            <div class="mb-3">
+                <img src="https://ui-avatars.com/api/?name={{ current_user.username }}&background=random&size=128" class="rounded-circle shadow">
+            </div>
+            <h2 class="fw-bold">{{ current_user.username }}</h2>
+            <hr>
+            <div class="row mt-4">
+                <div class="col-6 border-end">
+                    <h5 class="text-muted">ยอดเงินคงเหลือ</h5>
+                    <h3 class="text-primary fw-bold">{{ "{:,}".format(current_user.balance) }} THB</h3>
                 </div>
-                
-                <div class="d-grid gap-2">
-                    <a href="/my-cards" class="btn btn-primary fw-bold rounded-pill py-2">จัดการการ์ดของฉัน</a>
-                    <a href="/topup" class="btn btn-outline-success rounded-pill py-2">เติมเงิน</a>
+                <div class="col-6">
+                    <h5 class="text-muted">การ์ดในครอบครอง</h5>
+                    <h3 class="text-success fw-bold">{{ cards_count }} ใบ</h3>
                 </div>
+            </div>
+            <div class="mt-4">
+                <a href="/" class="btn btn-dark w-100 mb-2">กลับไปช้อปปิ้ง</a>
+                <a href="/logout" class="btn btn-outline-danger w-100">ออกจากระบบ</a>
             </div>
         </div>
     </div>

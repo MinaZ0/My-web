@@ -1,26 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-4 text-center">
-    <h2 class="fw-bold mb-4" style="color: #ff4d4d;">❤️ รายการที่ฉันถูกใจ</h2>
-    <hr>
-    <div class="row row-cols-1 row-cols-md-4 g-4 mt-2">
-        {% for fav in favorites %}
-        <div class="col">
-            <div class="card h-100 shadow-sm border-0 position-relative">
-                <img src="{{ fav.card.image_url }}" class="card-img-top p-3" style="height: 200px; object-fit: contain;">
-                <div class="card-body">
-                    <h6 class="fw-bold text-truncate">{{ fav.card.name }}</h6>
-                    <p class="text-primary fw-bold mb-3">{{ "{:,}".format(fav.card.price) }} THB</p>
-                    <a href="/buy/{{ fav.card.id }}" class="btn btn-success btn-sm w-100 fw-bold">Buy Now</a>
-                </div>
+<h2 class="mb-4">❤️ My Wishlist</h2>
+<div class="row">
+    {% for fav in favorites %}
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <img src="{{ fav.card.image_url }}" class="card-img-top p-3" style="height: 180px; object-fit: contain;">
+            <div class="card-body text-center">
+                <h6>{{ fav.card.name }}</h6>
+                <a href="/buy/{{ fav.card.id }}" class="btn btn-success btn-sm w-100">Buy Now</a>
             </div>
         </div>
-        {% else %}
-        <div class="col-12 py-5">
-            <h4 class="text-muted">ยังไม่มีรายการที่ถูกใจ... ลองไปเลือกดูหน้าหลักสิ!</h4>
-            <a href="/" class="btn btn-outline-danger mt-3">ไปหน้าหลัก</a>
-        </div>
-        {% endfor %}
     </div>
+    {% endfor %}
 </div>
 {% endblock %}
