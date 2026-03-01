@@ -115,3 +115,9 @@ def delete_card(id):
 def profile():
     my_cards_count = Card.query.filter_by(user_id=current_user.id).count()
     return render_template('profile.html', cards_count=my_cards_count)
+
+@app.route('/my-cards')
+@login_required
+def my_cards():
+    cards = Card.query.filter_by(user_id=current_user.id).all()
+    return render_template('my_cards.html', cards=cards)
