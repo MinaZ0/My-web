@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 
@@ -10,20 +10,19 @@ app.config['SECRET_KEY'] = 'guy-tcg-secret-key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-db = SQLAlchemy(app)
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+# --- Models ---
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(50), nullable=False)
     balance = db.Column(db.Integer, default=0)
+    cards = db.relationship('Card', backref='owner', lazy=True)
 
 class Card(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,12 +31,7 @@ class Card(db.Model):
     rarity = db.Column(db.String(50))
     price = db.Column(db.Integer, nullable=False)
     image_url = db.Column(db.String(255))
-
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(50), nullable=False)
-    balance = db.Column(db.Integer, default=0)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # เก็บว่าใครเป็นเจ้าของ
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -46,102 +40,66 @@ class Transaction(db.Model):
     type = db.Column(db.String(20)) # 'topup' หรือ 'buy'
     date = db.Column(db.DateTime, default=db.func.now())
 
-@app.route('/')
-def index():
-    search_query = request.args.get('search')
-    if search_query:
-        all_cards = Card.query.filter(Card.name.contains(search_query)).all()
-    else:
-        all_cards = Card.query.all()
-    return render_template('index.html', cards=all_cards)
-
-@app.route('/add', methods=['GET', 'POST'])
-def add_card():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        game = request.form.get('game')
-        rarity = request.form.get('rarity')
-        price = request.form.get('price')
-        image_url = request.form.get('image_url')
-        
-        new_card = Card(name=name, game=game, rarity=rarity, 
-                        price=int(price) if price else 0, 
-                        image_url=image_url)
-        db.session.add(new_card)
-        db.session.commit()
-        return redirect(url_for('index'))
-    return render_template('add_card.html')
-
-@app.route('/delete/<int:id>')
-def delete_card(id):
-    card_to_delete = Card.query.get_or_404(id) # หาการ์ดตาม ID
-    db.session.delete(card_to_delete)           # สั่งลบ
-    db.session.commit()                         # ยืนยันการลบ
-    return redirect(url_for('index'))
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        user = User.query.filter_by(username=username).first()
-        if user: 
-            login_user(user)
-            return redirect(url_for('index'))
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
-
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-@app.route('/topup', methods=['GET', 'POST'])
-@login_required
-def topup():
-    if request.method == 'POST':
-        amount = int(request.form.get('amount'))
-        current_user.balance += amount
-        new_tx = Transaction(user_id=current_user.id, amount=amount, type='topup')
-        db.session.add(new_tx)
-        db.session.commit()
-        flash(f'เติมเงินสำเร็จ! ยอดคงเหลือ {current_user.balance} THB', 'success')
-        return redirect(url_for('history'))
-    return render_template('topup.html')
+# --- Routes ---
 
-@app.route('/history')
-@login_required
-def history():
-    txs = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.date.desc()).all()
-    return render_template('history.html', transactions=txs)
-
-def seed_data():
-    with app.app_context():
-        db.create_all()
-        if not Card.query.first():
-            c1 = Card(name='Pikachu VMAX', game='Pokemon', rarity='Secret Rare', 
-                      price=1200, image_url='https://images.pokemontcg.io/swsh4/44_hires.png')
-            c2 = Card(name='Dark Magician', game='Yu-Gi-Oh', rarity='Ultra Rare', 
-                      price=800, image_url='https://images.ygoprodeck.com/images/cards/46986414.jpg')
-            db.session.add_all([c1, c2])
-            db.session.commit()
-
-def seed_data():
-    with app.app_context():
-        db.create_all() # สร้างตารางทั้งหมด (ถ้ายังไม่มี)
+@app.route('/')
+def index():
+    game_filter = request.args.get('game')
+    search_query = request.args.get('search')
+    
+    query = Card.query
+    if game_filter:
+        query = query.filter_by(game=game_filter)
+    if search_query:
+        query = query.filter(Card.name.contains(search_query))
         
-        if not User.query.filter_by(username='guy').first():
-            test_user = User(
-                username='guy', 
-                password='123', # รหัสผ่านตัวอย่าง
-                balance=5000     # เติมเงินให้ฟรีๆ ไว้ทดสอบระบบ
-            )
-            db.session.add(test_user)
-            db.session.commit()
-            print("Seed data: User 'guy' created!")
+    all_cards = query.all()
+    return render_template('index.html', cards=all_cards)
 
-if __name__ == '__main__':
-    seed_data()
-    app.run(debug=True)  
+@app.route('/add', methods=['GET', 'POST'])
+@login_required
+def add_card():
+    if request.method == 'POST':
+        new_card = Card(
+            name=request.form.get('name'),
+            game=request.form.get('game'),
+            rarity=request.form.get('rarity'),
+            price=int(request.form.get('price') or 0),
+            image_url=request.form.get('image_url'),
+            user_id=current_user.id # บันทึกเจ้าของ
+        )
+        db.session.add(new_card)
+        db.session.commit()
+        flash('ลงขายการ์ดสำเร็จ!', 'success')
+        return redirect(url_for('index'))
+    return render_template('add_card.html')
+
+@app.route('/buy/<int:id>')
+@login_required
+def buy_card(id):
+    card = Card.query.get_or_404(id)
+    if current_user.balance < card.price:
+        flash('เงินไม่พอ กรุณาเติมเงิน!', 'danger')
+        return redirect(url_for('topup'))
+    
+    # หักเงิน บันทึกประวัติ และลบการ์ด (เพราะถูกซื้อไปแล้ว)
+    current_user.balance -= card.price
+    new_tx = Transaction(user_id=current_user.id, amount=card.price, type='buy')
+    db.session.add(new_tx)
+    db.session.delete(card) 
+    db.session.commit()
+    
+    flash(f'ซื้อ {card.name} สำเร็จ!', 'success')
+    return redirect(url_for('history'))
+
+@app.route('/delete/<int:id>')
+@login_required
+def delete_card(id):
+    card = Card.query.get_or_404(id)
+    if card.user_id != current_user.id:
+        flash('คุณไม่มีสิทธิ์ลบการ์ดของคนอื่น!', 'danger')
+        return
