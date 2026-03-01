@@ -40,6 +40,12 @@ class Transaction(db.Model):
     type = db.Column(db.String(20)) # 'topup' หรือ 'buy'
     date = db.Column(db.DateTime, default=db.func.now())
 
+class Favorite(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    card_id = db.Column(db.Integer, db.ForeignKey('card.id'))
+    card = db.relationship('Card', backref='faved_by')
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
